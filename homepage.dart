@@ -14,13 +14,14 @@ class HomePage extends StatefulWidget {
 class _HomePage extends State<HomePage> with WidgetsBindingObserver {
   final GlobalKey<SfPdfViewerState> _pdfViewerKey = GlobalKey();
   PdfViewerController controller = PdfViewerController();
-  late PageController pageController;
+  // Page controller is not required
+  // late PageController pageController;
   int curentPage = 2;
 
   @override
   void initState() {
     super.initState();
-    pageController = PageController(initialPage: curentPage);
+    // pageController = PageController(initialPage: curentPage);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -74,8 +75,8 @@ class _HomePage extends State<HomePage> with WidgetsBindingObserver {
     final List<int> bytes = await controller.saveDocument(
         flattenOption: PdfFlattenOption.formFields);
     await file.writeAsBytes(bytes);
-    controller.jumpToPage(controller.pageNumber);
-    setState(() {});
+    // controller.jumpToPage(controller.pageNumber);
+    // setState(() {});
   }
 
   @override
@@ -106,21 +107,33 @@ class _HomePage extends State<HomePage> with WidgetsBindingObserver {
                 key: _pdfViewerKey,
                 onPageChanged: (PdfPageChangedDetails val) {
                   curentPage = controller.pageNumber;
-                  setState(() {});
+                  // It is not recommended to call setState within the onPageChanged callback
+                  // setState(() {});
                 },
                 onAnnotationDeselected: (Annotation annotation) {
-                  controller.clearSelection();
-                  annotation.color = Colors.white;
-                  annotation.opacity = 0;
-                  annotation.author = 'Guest';
-                  annotation.subject = 'Text Markup';
+                  // controller.clearSelection();
+                  // annotation.color = Colors.white;
+                  // annotation.opacity = 0;
+                  // annotation.author = 'Guest';
+                  // annotation.subject = 'Text Markup';
+
+                  // Instead of assigning white color and 0 opacity, we can remove the annotation
+                  // if your intention is to remove the annotation
+                  controller.removeAnnotation(annotation);
+                  // Save the document after removing the annotation
+                  _save();
                 },
                 onAnnotationAdded: (Annotation annotation) {
                   final Color randomColor = generateRandomColor();
                   annotation.color = randomColor;
                   annotation.author = 'Guest';
                   annotation.subject = 'Text Markup';
+                  _save();
                 },
+                // To jump to the desired page number on document load
+                // onDocumentLoaded: (details) {
+                //   controller.jumpToPage(curentPage);
+                // },
               );
             } else {
               return const Center(child: CircularProgressIndicator());
